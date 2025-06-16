@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
             min-height: 100vh;
             color: #333;
         }
@@ -58,11 +58,11 @@
         }
 
         .drop-zone {
-            border: 3px dashed #667eea;
+            border: 3px dashed #6b7280;
             border-radius: 15px;
             padding: 3rem;
             text-align: center;
-            background: linear-gradient(45deg, #f8f9ff, #ffffff);
+            background: linear-gradient(45deg, #f9fafb, #ffffff);
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
@@ -76,7 +76,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(107,114,128,0.1) 0%, transparent 70%);
             animation: pulse 3s ease-in-out infinite;
             pointer-events: none;
         }
@@ -87,8 +87,8 @@
         }
 
         .drop-zone:hover, .drop-zone.dragover {
-            border-color: #764ba2;
-            background: linear-gradient(45deg, #f0f2ff, #ffffff);
+            border-color: #374151;
+            background: linear-gradient(45deg, #f3f4f6, #ffffff);
             transform: scale(1.02);
         }
 
@@ -99,7 +99,7 @@
 
         .upload-icon {
             font-size: 4rem;
-            color: #667eea;
+            color: #6b7280;
             margin-bottom: 1rem;
             display: block;
         }
@@ -121,7 +121,7 @@
         }
 
         .upload-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #6b7280, #374151);
             color: white;
             border: none;
             padding: 1rem 2rem;
@@ -130,12 +130,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(102,126,234,0.3);
+            box-shadow: 0 10px 20px rgba(107,114,128,0.3);
         }
 
         .upload-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(102,126,234,0.4);
+            box-shadow: 0 15px 30px rgba(107,114,128,0.4);
         }
 
         .results-section {
@@ -174,7 +174,7 @@
         }
 
         .download-btn {
-            background: linear-gradient(135deg, #36d1dc, #5b86e5);
+            background: linear-gradient(135deg, #4b5563, #374151);
             color: white;
             border: none;
             padding: 0.8rem 1.5rem;
@@ -183,12 +183,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 15px rgba(54,209,220,0.3);
+            box-shadow: 0 8px 15px rgba(75,85,99,0.3);
         }
 
         .download-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(54,209,220,0.4);
+            box-shadow: 0 12px 25px rgba(75,85,99,0.4);
         }
 
         .stats-grid {
@@ -199,8 +199,8 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #f8f9ff, #ffffff);
-            border: 1px solid #e0e7ff;
+            background: linear-gradient(135deg, #f9fafb, #ffffff);
+            border: 1px solid #e5e7eb;
             border-radius: 15px;
             padding: 1.5rem;
             text-align: center;
@@ -215,7 +215,7 @@
         .stat-value {
             font-size: 2rem;
             font-weight: 700;
-            color: #667eea;
+            color: #374151;
             margin-bottom: 0.5rem;
         }
 
@@ -226,7 +226,7 @@
         }
 
         .table-container {
-            background: #f8f9ff;
+            background: #f9fafb;
             border-radius: 15px;
             padding: 1.5rem;
             overflow-x: auto;
@@ -242,7 +242,7 @@
         }
 
         .pivot-table th {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #6b7280, #374151);
             color: white;
             padding: 1rem;
             text-align: left;
@@ -252,16 +252,16 @@
 
         .pivot-table td {
             padding: 1rem;
-            border-bottom: 1px solid #e0e7ff;
+            border-bottom: 1px solid #e5e7eb;
             font-size: 1rem;
         }
 
         .pivot-table tr:hover {
-            background: #f8f9ff;
+            background: #f9fafb;
         }
 
         .pivot-table tr:nth-child(even) {
-            background: #fafbff;
+            background: #fafbfc;
         }
 
         .loading {
@@ -274,7 +274,7 @@
             width: 50px;
             height: 50px;
             border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
+            border-top: 5px solid #6b7280;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 1rem;
@@ -325,7 +325,6 @@
         <div class="upload-section">
             <div class="drop-zone" id="dropZone">
                 <div class="drop-zone-content">
-                    <span class="upload-icon"></span>
                     <h3>Drop your CSV file here</h3>
                     <p>or click to browse your files</p>
                     <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
