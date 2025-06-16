@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisor Peaks Analyzer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .drop-zone {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            background: linear-gradient(45deg, #f8f9ff, #ffffff);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.2; }
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #764ba2;
+            background: linear-gradient(45deg, #f0f2ff, #ffffff);
+            transform: scale(1.02);
+        }
+
+        .drop-zone-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .drop-zone h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .drop-zone p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(102,126,234,0.3);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102,126,234,0.4);
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: none;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .results-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #36d1dc, #5b86e5);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(54,209,220,0.3);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(54,209,220,0.4);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9ff, #ffffff);
+            border: 1px solid #e0e7ff;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .table-container {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .pivot-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .pivot-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .pivot-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e7ff;
+            font-size: 1rem;
+        }
+
+        .pivot-table tr:hover {
+            background: #f8f9ff;
+        }
+
+        .pivot-table tr:nth-child(even) {
+            background: #fafbff;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .upload-section, .results-section {
+                padding: 2rem;
+            }
+            
+            .results-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Supervisor Peaks Analyzer</h1>
+            <p>Upload your supervisor login CSV to generate automated pivot tables</p>
+        </div>
+
+        <div class="upload-section">
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone-content">
+                    <span class="upload-icon">📊</span>
+                    <h3>Drop your CSV file here</h3>
+                    <p>or click to browse your files</p>
+                    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                        Choose File
+                    </button>
+                </div>
+            </div>
+            <input type="file" id="fileInput" class="file-input" accept=".csv" />
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing your data...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="results-section" id="results">
+            <div class="results-header">
+                <h2 class="results-title">UK Supervisor Peaks</h2>
+                <button class="download-btn" id="downloadBtn">📥 Download CSV</button>
+            </div>
+
+            <div class="stats-grid" id="statsGrid">
+                <!-- Stats will be populated here -->
+            </div>
+
+            <div class="table-container">
+                <table class="pivot-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Unique Login Events</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SupervisorPeaksAnalyzer {
+            constructor() {
+                this.data = [];
+                this.pivotTable = [];
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                const dropZone = document.getElementById('dropZone');
+                const fileInput = document.getElementById('fileInput');
+                const downloadBtn = document.getElementById('downloadBtn');
+
+                // File input change
+                fileInput.addEventListener('change', (e) => {
+                    this.handleFile(e.target.files[0]);
+                });
+
+                // Drag and drop
+                dropZone.addEventListener('click', () => {
+                    fileInput.click();
+                });
+
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('dragover');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    this.handleFile(e.dataTransfer.files[0]);
+                });
+
+                // Download button
+                downloadBtn.addEventListener('click', () => {
+                    this.downloadCSV();
+                });
+            }
+
+            handleFile(file) {
+                if (!file) return;
+
+                if (!file.name.toLowerCase().endsWith('.csv')) {
+                    this.showError('Please select a CSV file.');
+                    return;
+                }
+
+                this.showLoading(true);
+                this.hideError();
+
+                Papa.parse(file, {
+                    header: true,
+                    complete: (results) => {
+                        try {
+                            this.processData(results.data);
+                        } catch (error) {
+                            this.showError('Error processing file: ' + error.message);
+                        } finally {
+                            this.showLoading(false);
+                        }
+                    },
+                    error: (error) => {
+                        this.showError('Error reading file: ' + error.message);
+                        this.showLoading(false);
+                    }
+                });
+            }
+
+            processData(rawData) {
+                const processedData = [];
+
+                rawData.forEach(row => {
+                    const timestamp = row['@timestamp'] || row.timestamp;
+                    const message = row.message;
+
+                    if (!timestamp || !message) return;
+
+                    // Extract date from timestamp
+                    const dateMatch = timestamp.match(/(\w+ \d+, \d+)/);
+                    if (!dateMatch) return;
+
+                    // Extract username from message
+                    const usernameMatch = message.match(/userName: ([^,]+)/);
+                    if (!usernameMatch) return;
+
+                    const dateStr = dateMatch[1];
+                    const username = usernameMatch[1];
+
+                    try {
+                        const dateObj = new Date(dateStr);
+                        const formattedDate = `${dateObj.getMonth() + 1}/${dateObj.getDate()}/${dateObj.getFullYear()}`;
+                        
+                        processedData.push({
+                            date: formattedDate,
+                            username: username,
+                            timestamp: timestamp
+                        });
+                    } catch (error) {
+                        console.warn(`Could not parse date: ${dateStr}`);
+                    }
+                });
+
+                if (processedData.length === 0) {
+                    throw new Error('No valid supervisor login data found in the file.');
+                }
+
+                this.data = processedData;
+                this.createPivotTable();
+                this.displayResults();
+            }
+
+            createPivotTable() {
+                const dateGroups = {};
+
+                this.data.forEach(row => {
+                    if (!dateGroups[row.date]) {
+                        dateGroups[row.date] = new Set();
+                    }
+                    dateGroups[row.date].add(row.username);
+                });
+
+                this.pivotTable = Object.entries(dateGroups)
+                    .map(([date, userSet]) => ({
+                        Date: date,
+                        'Unique Login Events': userSet.size
+                    }))
+                    .sort((a, b) => new Date(a.Date) - new Date(b.Date));
+            }
+
+            displayResults() {
+                this.displayPivotTable();
+                this.displayStatistics();
+                document.getElementById('results').style.display = 'block';
+            }
+
+            displayPivotTable() {
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = '';
+
+                this.pivotTable.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.Date}</td>
+                        <td>${row['Unique Login Events']}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            }
+
+            displayStatistics() {
+                const events = this.pivotTable.map(row => row['Unique Login Events']);
+                const total = events.reduce((sum, val) => sum + val, 0);
+                const average = total / events.length;
+                const max = Math.max(...events);
+                const min = Math.min(...events);
+
+                const maxDate = this.pivotTable.find(row => row['Unique Login Events'] === max).Date;
+                const minDate = this.pivotTable.find(row => row['Unique Login Events'] === min).Date;
+
+                const statsGrid = document.getElementById('statsGrid');
+                statsGrid.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-value">${this.pivotTable.length}</div>
+                        <div class="stat-label">Days Analyzed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${total}</div>
+                        <div class="stat-label">Total Login Events</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${average.toFixed(1)}</div>
+                        <div class="stat-label">Average per Day</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${max}</div>
+                        <div class="stat-label">Peak Day (${maxDate})</div>
+                    </div>
+                `;
+            }
+
+            downloadCSV() {
+                let csv = 'Date,Unique Login Events\n';
+                this.pivotTable.forEach(row => {
+                    csv += `${row.Date},${row['Unique Login Events']}\n`;
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'supervisor_peaks_pivot.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }
+
+            showLoading(show) {
+                document.getElementById('loading').style.display = show ? 'block' : 'none';
+            }
+
+            showError(message) {
+                const errorDiv = document.getElementById('error');
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+
+            hideError() {
+                document.getElementById('error').style.display = 'none';
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            new SupervisorPeaksAnalyzer();
+        });
+    </script>
+</body>
+</html>
